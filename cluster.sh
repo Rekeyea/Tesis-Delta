@@ -33,6 +33,22 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
             ;;
+        --flink)
+            if [ -x "./scripts/connect-flink.sh" ]; then
+                ./scripts/connect-flink.sh
+            else
+                echo "Error: connect-flink.sh not found or not executable"
+                exit 1
+            fi
+            ;;
+        --doris)
+            if [ -x "./scripts/connect-doris.sh" ]; then
+                ./scripts/connect-doris.sh
+            else
+                echo "Error: connect-doris.sh not found or not executable"
+                exit 1
+            fi
+            ;;
         *)
             echo "Invalid option: $1"
             usage

@@ -10,6 +10,9 @@ services:
       - TIMEZONE=UTC
       - ENABLE_PROMETHEUS=true
       - PROMETHEUS_PORT=8030
+      - AWS_SECRET_ACCESS_KEY=minio123
+      - AWS_REGION=us-east-1
+      - S3_ENDPOINT=http://minio:9000
     volumes:
       - doris-fe-meta:/opt/apache-doris/fe/doris-meta/
       - doris-fe-log:/opt/apache-doris/fe/log/

@@ -17,4 +17,4 @@ cd ./scripts
 echo "Waiting for Doris ..."
 sleep 20
 ./create-doris-user.sh
-# ./flink-session.sh
+./flink-session.sh

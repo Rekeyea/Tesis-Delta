@@ -38,6 +38,11 @@ services:
       - ./container/jars/flink-connector-jdbc-3.2.0-1.19.jar:/opt/flink/lib/flink-connector-jdbc-3.2.0-1.19.jar
       - ./container/jars/postgresql-42.7.5.jar:/opt/flink/lib/postgresql-42.7.5.jar
       - ./container/jars/flink-metrics-prometheus-1.20.0.jar:/opt/flink/lib/flink-metrics-prometheus-1.20.0.jar
+      - ./container/jars/paimon-flink-1.20-1.1.jar:/opt/flink/lib/paimon-flink-1.20-1.1.jar
+      - ./container/jars/flink-s3-fs-hadoop-1.20.0.jar:/opt/flink/lib/flink-s3-fs-hadoop-1.20.0.jar
+      - ./container/jars/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./container/jars/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar:/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar
+      - ./container/jars/paimon-s3-1.1.jar:/opt/flink/lib/paimon-s3-1.1.jar
       - ./container/config/sql-client-defaults.yaml:/opt/flink/conf/sql-client-defaults.yaml
       - ./container/jobs:/opt/flink/bin/jobs
     networks:
@@ -77,6 +82,11 @@ services:
       - ./container/jars/flink-connector-jdbc-3.2.0-1.19.jar:/opt/flink/lib/flink-connector-jdbc-3.2.0-1.19.jar
       - ./container/jars/postgresql-42.7.5.jar:/opt/flink/lib/postgresql-42.7.5.jar
       - ./container/jars/flink-metrics-prometheus-1.20.0.jar:/opt/flink/lib/flink-metrics-prometheus-1.20.0.jar
+      - ./container/jars/paimon-flink-1.20-1.1.jar:/opt/flink/lib/paimon-flink-1.20-1.1.jar
+      - ./container/jars/flink-s3-fs-hadoop-1.20.0.jar:/opt/flink/lib/flink-s3-fs-hadoop-1.20.0.jar
+      - ./container/jars/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
+      - ./container/jars/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar:/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar
+      - ./container/jars/paimon-s3-1.1.jar:/opt/flink/lib/paimon-s3-1.1.jar
     networks:
       - delta
 
