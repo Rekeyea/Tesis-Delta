@@ -62,7 +62,7 @@ services:
       - S3_PATH_STYLE_ACCESS=true
       - |
         FLINK_PROPERTIES=
-        taskmanager.numberOfTaskSlots: 3
+        taskmanager.numberOfTaskSlots: 4
         taskmanager.memory.process.size: 7g
         taskmanager.memory.task.heap.size: 4g
         taskmanager.memory.managed.size: 1g
