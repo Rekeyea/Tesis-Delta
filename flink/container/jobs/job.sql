@@ -627,7 +627,6 @@ SELECT
     patient_id,
     window_start,
     window_end,
-
     respiratory_rate_value,
     oxygen_saturation_value,
     blood_pressure_value,
@@ -766,8 +765,7 @@ FROM (
     SELECT
         patient_id,
         window_start,
-        window_end,
-
+        MAX(window_end) as window_end,
         COALESCE(AVG(rr_value), 0) AS respiratory_rate_value,
         COALESCE(AVG(os_value), 0) AS oxygen_saturation_value,
         COALESCE(AVG(bp_value), 0) AS blood_pressure_value,
@@ -809,5 +807,5 @@ FROM (
             INTERVAL '1' MINUTES
         )
     ) AS gdnews2
-    GROUP BY patient_id, window_start, window_end
+    GROUP BY patient_id, window_start
 ) AS gdnews2;

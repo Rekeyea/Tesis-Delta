@@ -603,7 +603,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select \n  max(timestampdiff(second, ingestion_timestamp, aggregation_timestamp)) as i2s_max_diff,\n  window_start\nfrom paimon.delta.gdnews2_scores\ngroup by window_start",
+          "rawSql": "select\n    max(timestampdiff(second, ingestion_timestamp, aggregation_timestamp)) as i2s_max_diff,\n    cast(from_unixtime(floor(unix_timestamp(ingestion_timestamp) / 60) * 60) as datetime) as window_start\nfrom paimon.delta.gdnews2_scores\ngroup by from_unixtime(floor(unix_timestamp(ingestion_timestamp) / 60) * 60)\norder by window_start",
           "refId": "A",
           "sql": {
             "columns": [
@@ -636,8 +636,8 @@
     "list": []
   },
   "time": {
-    "from": "2025-01-07T23:31:00.000Z",
-    "to": "2025-01-14T20:17:00.000Z"
+    "from": "now-3h",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
