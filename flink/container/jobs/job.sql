@@ -349,17 +349,7 @@ SELECT * FROM default_catalog.default_database.raw_measurements;
 INSERT INTO paimon.delta.enriched_measurements
 SELECT
     measurement_type,
-    CASE
-        WHEN measurement_type = 'CONSCIOUSNESS' THEN
-            CASE raw_value
-                WHEN 'A' THEN 1
-                WHEN 'V' THEN 2
-                WHEN 'P' THEN 3
-                WHEN 'U' THEN 4
-                ELSE NULL
-            END
-        ELSE CAST(raw_value AS DOUBLE)
-    END AS `value`,
+    CAST(raw_value AS DOUBLE) AS `value`,
     device_id,
     REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1) AS patient_id,
 
