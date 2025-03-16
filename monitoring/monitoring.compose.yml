@@ -16,10 +16,12 @@ services:
       - 9100:9100
   grafana:
     image: grafana/grafana:latest
-    volumes:
-      - grafana-storage:/var/lib/grafana
     networks:
       - delta
+    volumes:
+      - ./datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./dashboards:/var/lib/grafana/dashboards
     ports:
       - 3000:3000
     environment:
