@@ -353,7 +353,7 @@ SELECT
     device_id,
     REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1) AS patient_id,
 
-    -- Quality components
+    -- Quality components (unchanged)
     CAST((
         CASE
             WHEN device_id LIKE 'MEDICAL%' THEN 1.0
@@ -375,12 +375,62 @@ SELECT
     ) AS DECIMAL(7,2)) AS quality_weight,
 
     CASE
-        WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 1 THEN 1.0
-        WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 6 THEN 0.9
-        WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 12 THEN 0.7
-        WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 24 THEN 0.5
-        WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 48 THEN 0.3
-        ELSE 0.2
+        -- First reading case (no previous value)
+        WHEN LAG(measurement_timestamp) OVER (
+            PARTITION BY REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1), measurement_type 
+            ORDER BY measurement_timestamp
+        ) IS NULL THEN
+            -- Transmission freshness only
+            CASE
+                WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 1 THEN 1.0
+                WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 6 THEN 0.9
+                WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 12 THEN 0.7
+                WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 24 THEN 0.5
+                WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 48 THEN 0.3
+                ELSE 0.2
+            END
+        ELSE
+            -- Combined freshness (transmission + regularity)
+            0.5 * (
+                -- Transmission component
+                CASE
+                    WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 1 THEN 1.0
+                    WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 6 THEN 0.9
+                    WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 12 THEN 0.7
+                    WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 24 THEN 0.5
+                    WHEN TIMESTAMPDIFF(HOUR, measurement_timestamp, ingestion_timestamp) <= 48 THEN 0.3
+                    ELSE 0.2
+                END
+            ) + 0.5 * (
+                -- Regularity component
+                CASE
+                    WHEN TIMESTAMPDIFF(HOUR, 
+                        LAG(measurement_timestamp) OVER (
+                            PARTITION BY REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1), measurement_type 
+                            ORDER BY measurement_timestamp
+                        ), 
+                        measurement_timestamp) <= 4 THEN 1.0
+                    WHEN TIMESTAMPDIFF(HOUR, 
+                        LAG(measurement_timestamp) OVER (
+                            PARTITION BY REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1), measurement_type 
+                            ORDER BY measurement_timestamp
+                        ), 
+                        measurement_timestamp) <= 8 THEN 0.8
+                    WHEN TIMESTAMPDIFF(HOUR, 
+                        LAG(measurement_timestamp) OVER (
+                            PARTITION BY REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1), measurement_type 
+                            ORDER BY measurement_timestamp
+                        ), 
+                        measurement_timestamp) <= 12 THEN 0.6
+                    WHEN TIMESTAMPDIFF(HOUR, 
+                        LAG(measurement_timestamp) OVER (
+                            PARTITION BY REGEXP_EXTRACT(device_id, '.*_(P\d+)$', 1), measurement_type 
+                            ORDER BY measurement_timestamp
+                        ), 
+                        measurement_timestamp) <= 24 THEN 0.4
+                    ELSE 0.2
+                END
+            )
     END AS freshness_weight,
     
     -- Timestamps
