@@ -11,11 +11,6 @@ services:
         jobmanager.rpc.address: jobmanager
         jobmanager.bind-host: 0.0.0.0
         rest.bind-address: 0.0.0.0
-        jobmanager.memory.process.size: 6g
-        jobmanager.memory.heap.size: 3g
-        jobmanager.memory.off-heap.size: 1g
-        jobmanager.memory.jvm-metaspace.size: 1g
-        jobmanager.memory.jvm-overhead.min: 1g
         state.backend: rocksdb
         state.backend.incremental: true
         state.checkpoints.dir: file:///opt/flink/checkpoints
@@ -62,12 +57,7 @@ services:
       - S3_PATH_STYLE_ACCESS=true
       - |
         FLINK_PROPERTIES=
-        taskmanager.numberOfTaskSlots: 3
-        taskmanager.memory.process.size: 7g
-        taskmanager.memory.task.heap.size: 4g
-        taskmanager.memory.managed.size: 1g
-        taskmanager.memory.network.max: 512m
-        taskmanager.memory.framework.heap.size: 256m
+        taskmanager.numberOfTaskSlots: 30
         metrics.reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
         metrics.reporter.prom.port: 9249
         metrics.reporter.prom.host: 0.0.0.0
@@ -87,45 +77,5 @@ services:
       - ./container/jars/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar:/opt/flink/lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar
       - ./container/jars/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar:/opt/flink/lib/flink-sql-connector-hive-3.1.3_2.12-1.20.0.jar
       - ./container/jars/paimon-s3-1.1.jar:/opt/flink/lib/paimon-s3-1.1.jar
-    networks:
-      - delta
-
-  taskmanager2:
-    image: flink:1.20.0
-    environment: *tm-env
-    depends_on:
-      - jobmanager
-    command: taskmanager
-    volumes: *tm-volumes
-    networks:
-      - delta
-
-  taskmanager3:
-    image: flink:1.20.0
-    environment: *tm-env
-    depends_on:
-      - jobmanager
-    command: taskmanager
-    volumes: *tm-volumes
-    networks:
-      - delta
-
-  taskmanager4:
-    image: flink:1.20.0
-    environment: *tm-env
-    depends_on:
-      - jobmanager
-    command: taskmanager
-    volumes: *tm-volumes
-    networks:
-      - delta
-
-  taskmanager5:
-    image: flink:1.20.0
-    environment: *tm-env
-    depends_on:
-      - jobmanager
-    command: taskmanager
-    volumes: *tm-volumes
     networks:
       - delta

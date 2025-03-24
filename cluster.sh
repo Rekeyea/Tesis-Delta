@@ -49,6 +49,14 @@ while [ $# -gt 0 ]; do
                 exit 1
             fi
             ;;
+        --cancel)
+            if [ -x "./scripts/cancel-flink-jobs.sh" ]; then
+                ./scripts/cancel-flink-jobs.sh
+            else
+                echo "Error: cancel-flink-jobs.sh not found or not executable"
+                exit 1
+            fi
+            ;;
         *)
             echo "Invalid option: $1"
             usage
