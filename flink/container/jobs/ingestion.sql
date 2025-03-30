@@ -1,11 +1,11 @@
 SET 'execution.runtime-mode' = 'streaming';
-SET 'execution.checkpointing.interval' = '1 s';
 SET 'execution.checkpointing.mode' = 'EXACTLY_ONCE';
-SET 'execution.checkpointing.timeout' = '120s';
-SET 'execution.checkpointing.min-pause' = '5s';
-SET 'execution.checkpointing.max-concurrent-checkpoints' = '1';
 SET 'table.local-time-zone' = 'UTC';
-SET 'parallelism.default' = '3';
+SET 'execution.checkpointing.interval' = '60000';
+SET 'execution.checkpointing.timeout' = '30000';
+SET 'state.backend' = 'hashmap';
+SET 'table.exec.state.ttl' = '300000';
+SET 'parallelism.default' = '2';
 
 
 CREATE CATALOG paimon WITH (
@@ -17,6 +17,7 @@ CREATE CATALOG paimon WITH (
     's3.path.style.access' = 'true',
     'location-in-properties' = 'true'
 );
+
 CREATE TABLE default_catalog.default_database.raw_measurements (
     measurement_timestamp TIMESTAMP(3),
     measurement_type STRING,

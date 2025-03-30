@@ -1,12 +1,11 @@
 SET 'execution.runtime-mode' = 'streaming';
-SET 'execution.checkpointing.interval' = '300 s';
-SET 'table.exec.state.ttl' = '1 h';
 SET 'execution.checkpointing.mode' = 'EXACTLY_ONCE';
-SET 'execution.checkpointing.timeout' = '900s';
-SET 'execution.checkpointing.min-pause' = '5s';
-SET 'execution.checkpointing.max-concurrent-checkpoints' = '1';
 SET 'table.local-time-zone' = 'UTC';
-
+SET 'execution.checkpointing.interval' = '60000';
+SET 'execution.checkpointing.timeout' = '30000';
+SET 'state.backend' = 'hashmap';
+SET 'table.exec.state.ttl' = '300000';
+SET 'parallelism.default' = '2';
 
 CREATE CATALOG paimon WITH (
     'type' = 'paimon',
@@ -63,8 +62,7 @@ CREATE TABLE paimon.delta.measurements_respiratory_rate (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.measurements_oxygen_saturation (
     device_id STRING,
@@ -81,8 +79,7 @@ CREATE TABLE paimon.delta.measurements_oxygen_saturation (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.measurements_blood_pressure_systolic (
     device_id STRING,
@@ -99,8 +96,7 @@ CREATE TABLE paimon.delta.measurements_blood_pressure_systolic (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.measurements_heart_rate (
     device_id STRING,
@@ -117,8 +113,7 @@ CREATE TABLE paimon.delta.measurements_heart_rate (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.measurements_temperature (
     device_id STRING,
@@ -135,8 +130,7 @@ CREATE TABLE paimon.delta.measurements_temperature (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.measurements_consciousness (
     device_id STRING,
@@ -153,8 +147,7 @@ CREATE TABLE paimon.delta.measurements_consciousness (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 -- Create tables for measurement scores
 CREATE TABLE paimon.delta.scores_respiratory_rate (
@@ -175,8 +168,7 @@ CREATE TABLE paimon.delta.scores_respiratory_rate (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.scores_oxygen_saturation (
     patient_id STRING,
@@ -196,8 +188,7 @@ CREATE TABLE paimon.delta.scores_oxygen_saturation (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.scores_blood_pressure_systolic (
     patient_id STRING,
@@ -217,8 +208,7 @@ CREATE TABLE paimon.delta.scores_blood_pressure_systolic (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.scores_heart_rate (
     patient_id STRING,
@@ -238,8 +228,7 @@ CREATE TABLE paimon.delta.scores_heart_rate (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.scores_temperature (
     patient_id STRING,
@@ -259,8 +248,7 @@ CREATE TABLE paimon.delta.scores_temperature (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
 
 CREATE TABLE paimon.delta.scores_consciousness (
     patient_id STRING,
@@ -280,8 +268,44 @@ CREATE TABLE paimon.delta.scores_consciousness (
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
     WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS
-)
-PARTITIONED BY (patient_id, measurement_timestamp);
+);
+
+
+CREATE TABLE paimon.delta.scores (
+    patient_id STRING,
+    window_start TIMESTAMP(3),
+    window_end TIMESTAMP(3),
+
+    respiratory_rate_value DOUBLE,
+    oxygen_saturation_value DOUBLE,
+    blood_pressure_value DOUBLE,
+    heart_rate_value DOUBLE,
+    temperature_value DOUBLE,
+    consciousness_value DOUBLE,
+
+    respiratory_rate_score DOUBLE,
+    oxygen_saturation_score DOUBLE,
+    blood_pressure_score DOUBLE,
+    heart_rate_score DOUBLE,
+    temperature_score DOUBLE,
+    consciousness_score DOUBLE,
+
+    respiratory_rate_trust_score DOUBLE,
+    oxygen_saturation_trust_score DOUBLE,
+    blood_pressure_trust_score DOUBLE,
+    heart_rate_trust_score DOUBLE,
+    temperature_trust_score DOUBLE,
+    consciousness_trust_score DOUBLE,
+
+    measurement_timestamp TIMESTAMP(3),
+    ingestion_timestamp TIMESTAMP(3),
+    enrichment_timestamp TIMESTAMP(3),
+    routing_timestamp TIMESTAMP(3),
+    scoring_timestamp TIMESTAMP(3),
+    union_timestamp TIMESTAMP(3),
+    WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS,
+    PRIMARY KEY (patient_id, window_start) NOT ENFORCED
+);
 
 CREATE TABLE paimon.delta.gdnews2_scores (
     patient_id STRING,
@@ -297,21 +321,13 @@ CREATE TABLE paimon.delta.gdnews2_scores (
     consciousness_value DOUBLE,
 
     -- Raw NEWS2 scores
-    respiratory_rate_score INT,
-    oxygen_saturation_score INT,
-    blood_pressure_score INT,
-    heart_rate_score INT,
-    temperature_score INT,
-    consciousness_score INT,
-    news2_score INT,
-
-    -- Measurements statuses
-    respiratory_rate_status STRING,
-    oxygen_saturation_status STRING,
-    blood_pressure_status STRING,
-    heart_rate_status STRING,
-    temperature_status STRING,
-    consciousness_status STRING,
+    respiratory_rate_score DOUBLE,
+    oxygen_saturation_score DOUBLE,
+    blood_pressure_score DOUBLE,
+    heart_rate_score DOUBLE,
+    temperature_score DOUBLE,
+    consciousness_score DOUBLE,
+    news2_score DOUBLE,
 
     -- Trust gdNEWS2 scores
     respiratory_rate_trust_score DOUBLE,
@@ -329,9 +345,8 @@ CREATE TABLE paimon.delta.gdnews2_scores (
     enrichment_timestamp TIMESTAMP(3),
     routing_timestamp TIMESTAMP(3),
     scoring_timestamp TIMESTAMP(3),
-
-    flink_timestamp TIMESTAMP(3),
+    union_timestamp TIMESTAMP(3),
     aggregation_timestamp TIMESTAMP(3),
-    WATERMARK FOR aggregation_timestamp AS aggregation_timestamp - INTERVAL '10' SECONDS,
-    PRIMARY KEY (patient_id, window_start, window_end) NOT ENFORCED
+    WATERMARK FOR measurement_timestamp AS measurement_timestamp - INTERVAL '10' SECONDS,
+    PRIMARY KEY (patient_id, window_start) NOT ENFORCED
 );
